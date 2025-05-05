@@ -12,7 +12,7 @@ CPU := 1
 MAX_INSTANCES := 10
 MIN_INSTANCES := 0
 
-.PHONY: build deploy clean setup
+.PHONY: build deploy clean setup push
 
 # Artifact Registryのリポジトリを作成
 setup:
@@ -23,7 +23,7 @@ setup:
 
 # Dockerイメージのビルド
 build:
-	docker build -t $(IMAGE_NAME) .
+	docker buildx build --platform linux/amd64 -t $(IMAGE_NAME) .
 
 # Cloud Runへのデプロイ
 deploy:
@@ -50,4 +50,12 @@ run:
 # イメージの削除
 clean:
 	docker rmi $(IMAGE_NAME) || true
-	gcloud artifacts docker images delete $(IMAGE_NAME) --quiet || true 
+	gcloud artifacts docker images delete $(IMAGE_NAME) --quiet || true
+
+# Artifact Registryへイメージをpush
+push:
+	docker push $(IMAGE_NAME)
+
+# Docker認証設定
+configure-docker:
+	gcloud auth configure-docker asia-northeast1-docker.pkg.dev 
