@@ -1,10 +1,11 @@
 import os
 import logging
 from slack_bolt import App
-from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import Flask, request
+from slack_bolt.adapter.fastapi import SlackRequestHandler
+from fastapi import FastAPI, Request
 import google.genai as genai
 from dotenv import load_dotenv
+import uvicorn
 
 # ロギングの設定
 log_level = logging.DEBUG if os.environ.get("DEBUG") else logging.INFO
@@ -48,13 +49,13 @@ def handle_message(message, say):
         logger.error(f"エラーが発生しました: {str(e)}")
         say(f"エラーが発生しました: {str(e)}")
 
-# Flaskアプリの作成
-flask_app = Flask(__name__)
+# FastAPIアプリの作成
+fastapi_app = FastAPI()
 handler = SlackRequestHandler(app)
 
-@flask_app.route("/slack/events", methods=["POST"])
-def slack_events():
-    return handler.handle(request)
+@fastapi_app.post("/slack/events")
+async def slack_events(request: Request):
+    return await handler.handle(request)
 
 if __name__ == "__main__":
-    flask_app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
