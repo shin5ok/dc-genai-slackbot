@@ -7,7 +7,8 @@ import google.genai as genai
 from dotenv import load_dotenv
 
 # ロギングの設定
-logging.basicConfig(level=logging.DEBUG)
+log_level = logging.DEBUG if os.environ.get("DEBUG") else logging.INFO
+logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
 # 環境変数の読み込み
@@ -27,14 +28,21 @@ client = genai.Client(
     location=os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
 )
 
+# ユーザーごとのチャットセッションを保持
+user_sessions = {}
+
 @app.message(".*")
 def handle_message(message, say):
+    user_id = message.get("user")
     user_message = message["text"]
+
+    # セッションがなければ新規作成
+    if user_id not in user_sessions:
+        user_sessions[user_id] = client.chats.create(model="gemini-2.0-flash-001")
+    chat = user_sessions[user_id]
+
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-001",
-            contents=user_message
-        )
+        response = chat.send_message(user_message)
         say(f"{response.text}")
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
