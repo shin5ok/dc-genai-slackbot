@@ -27,19 +27,14 @@ client = genai.Client(
     location=os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
 )
 
-@app.message("*")
+@app.message(".*")
 def handle_message(message, say):
-    # メッセージを取得
     user_message = message["text"]
-    
     try:
-        # Geminiにメッセージを送信
         response = client.models.generate_content(
             model="gemini-2.0-flash-001",
             contents=user_message
         )
-        
-        # 応答をSlackに送信
         say(f"{response.text}")
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
