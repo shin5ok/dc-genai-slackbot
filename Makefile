@@ -34,8 +34,10 @@ deploy:
 		--port $(PORT) \
 		--memory $(MEMORY) \
 		--cpu $(CPU) \
+		--no-cpu-throttling \
 		--max-instances $(MAX_INSTANCES) \
 		--min-instances $(MIN_INSTANCES) \
+		--set-env-vars SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN),SLACK_SIGNING_SECRET=$(SLACK_SIGNING_SECRET),GOOGLE_CLOUD_PROJECT=$(GOOGLE_CLOUD_PROJECT),GOOGLE_CLOUD_LOCATION=$(GOOGLE_CLOUD_LOCATION) \
 		--allow-unauthenticated
 
 # ローカルでの実行
