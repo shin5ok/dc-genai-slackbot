@@ -32,6 +32,9 @@ client = genai.Client(
 # ユーザーごとのチャットセッションを保持
 user_sessions = {}
 
+MODEL_NAME = os.environ.get("GOOGLE_GENAI_MODEL", "gemini-2.0-flash-001")
+logger.debug(f"MODEL_NAME: {MODEL_NAME}")
+
 @app.message(".*")
 def handle_message(message, say):
     user_id = message.get("user")
@@ -39,7 +42,7 @@ def handle_message(message, say):
 
     # セッションがなければ新規作成
     if user_id not in user_sessions:
-        user_sessions[user_id] = client.chats.create(model="gemini-2.0-flash-001")
+        user_sessions[user_id] = client.chats.create(model=MODEL_NAME)
     chat = user_sessions[user_id]
 
     try:
